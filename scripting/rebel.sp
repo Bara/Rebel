@@ -30,6 +30,10 @@ ConVar g_cBots      = null;
 ConVar g_cShoot     = null;
 ConVar g_cHurt      = null;
 ConVar g_cDeath     = null;
+
+ConVar g_cPlayerCmd  = null;
+ConVar g_cPlayerCmds = null;
+
 ConVar g_cAdminCmd  = null;
 ConVar g_cAdminCmds = null;
 
@@ -53,8 +57,11 @@ public void OnPluginStart()
 	g_cShoot    = CreateConVar("rebel_shoot",     "1", "Get rebel after shooting?");
 	g_cHurt     = CreateConVar("rebel_hurt",      "1", "Get rebel after hurt a player?");
 	g_cDeath    = CreateConVar("rebel_death",     "1", "Get rebel after a kill?");
-	g_cAdminCmd = CreateConVar("rebel_admin_cmd", "1", "Enable admin cmd (set player rebel)");
 	
+	g_cPlayerCmd  = CreateConVar("rebel_player_cmd",  "1", "Returns the state of a player");
+	g_cPlayerCmds = CreateConVar("rebel_player_cmds", "rebel", "Commands for checking rebel state");
+	
+	g_cAdminCmd  = CreateConVar("rebel_admin_cmd", "1", "Enable admin cmd (set player rebel)");
 	g_cAdminCmds = CreateConVar("rebel_admin_cmds", "setrebel,srebel", "Commands for set player rebel (max. 4 commands)");
 }
 
@@ -76,12 +83,25 @@ public void OnClientDisconnect(int client)
 
 public void OnConfigsExecuted()
 {
+	int iCount = 0;
+	char sCommands[128], sCommandsL[4][32], sCommand[32];
+	
+	if(g_cPlayerCmd.BoolValue)
+	{
+		g_cPlayerCmds.GetString(sCommands, sizeof(sCommands));
+		iCount = ExplodeString(sCommands, ",", sCommandsL, sizeof(sCommandsL), sizeof(sCommandsL[]));
+	
+		for(int i = 0; i < iCount; i++)
+		{
+			Format(sCommand, sizeof(sCommand), "sm_%s", sCommandsL[i]);
+			RegConsoleCmd(sCommand, Command_Rebel);
+		}
+	}
+	
 	if(g_cAdminCmd.BoolValue)
 	{
-		char sCommands[128], sCommandsL[4][32], sCommand[32];
-		
 		g_cAdminCmds.GetString(sCommands, sizeof(sCommands));
-		int iCount = ExplodeString(sCommands, ",", sCommandsL, sizeof(sCommandsL), sizeof(sCommandsL[]));
+		iCount = ExplodeString(sCommands, ",", sCommandsL, sizeof(sCommandsL), sizeof(sCommandsL[]));
 	
 		for(int i = 0; i < iCount; i++)
 		{
@@ -89,6 +109,19 @@ public void OnConfigsExecuted()
 			RegAdminCmd(sCommand, Command_SetRebel, ADMFLAG_BAN);
 		}
 	}
+}
+
+public Action Command_Rebel(int client, int args)
+{
+	if(!IsClientValid(client))
+		return Plugin_Handled;
+	
+	if(g_bRebel[client])
+		PrintToChat(client, "You are a rebel");
+	else
+		PrintToChat(client, "You aren't a rebel");
+	
+	return Plugin_Continue;
 }
 
 public Action Command_SetRebel(int client, int args)
