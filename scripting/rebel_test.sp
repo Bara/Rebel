@@ -43,3 +43,15 @@ public Action Command_TSetRebel(int client, int args)
 	
 	return Plugin_Continue;
 }
+
+public Action OnClientRebel(int client, bool bStatus)
+{
+	// status should never true
+	if(bStatus)
+	{
+		bStatus = false;
+		return Plugin_Changed;
+	}
+	
+	return Plugin_Continue;
+}

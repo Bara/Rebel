@@ -36,6 +36,8 @@ ConVar g_cPlayerCmds = null;
 ConVar g_cAdminCmd  = null;
 ConVar g_cAdminCmds = null;
 
+Handle g_hRebelChange = null;
+
 public Plugin myinfo = 
 {
 	name = "Rebel",
@@ -47,6 +49,8 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
+	g_hRebelChange = CreateGlobalForward("OnClientRebel", ET_Event, Param_Cell, Param_Cell);
+	
 	CreateNative("IsClientRebel", Native_IsClientRebel);
 	CreateNative("SetClientRebel", Native_SetClientRebel);
 	
@@ -269,16 +273,26 @@ public int Native_SetClientRebel(Handle plugin, int numParams)
 	return bStatus;
 }
 
-bool SetRebel(int client, int victim, bool status)
+bool SetRebel(int client, int victim, bool bStatus)
 {
-	// Call Forward	
+	// Call Forward
+	Action aRes = Plugin_Continue;
+	
+	Call_StartForward(g_hRebelChange);
+	Call_PushCell(client);
+	Call_PushCell(bStatus);
+	Call_Finish();
+	
+	if(aRes == Plugin_Stop)
+		// Return old status
+		return g_bRebel[client];
 	
 	// if victim = 0 -> reason without victim
 	// avoid warning (never used)
 	victim = victim+0;
 	
 	// set new status (ignore the old value, since we check it before we set a new status)
-	g_bRebel[client] = status;
+	g_bRebel[client] = bStatus;
 	
 	// send message
 	
