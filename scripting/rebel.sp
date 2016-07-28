@@ -9,7 +9,6 @@
 		Commands...
 			for users...
 				- (option to disable it & and a cvar for a command list) Rebel List (return list with all players - [X] = Rebel [ ] = No Rebel)
-				- (option to disable it & and a cvar for a command list) Rebel (return if player or not)
 		API...
 			- bool IsClientRebel(int client) - return status
 			- bool SetClientRebel(int client, bool status) - return new status
@@ -45,6 +44,15 @@ public Plugin myinfo =
 	version = "1.0.0",
 	url = "github.com/Bara20/Rebel"
 };
+
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
+{
+	CreateNative("IsClientRebel", Native_IsClientRebel);
+	
+	RegPluginLibrary("rebel");
+	
+	return APLRes_Success;
+}
 
 public void OnPluginStart()
 {
@@ -239,6 +247,13 @@ public Action Event_PlayerDeath(Event event, const char[] name, bool dontBroadca
 	}
 	
 	return Plugin_Continue;
+}
+
+public int Native_IsClientRebel(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	
+	return IsRebel(client);
 }
 
 bool SetRebel(int client, int victim, bool status)
