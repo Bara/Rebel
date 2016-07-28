@@ -9,6 +9,7 @@ stock bool IsRebelLoaded()
 }
 
 native bool IsClientRebel(int client);
+native bool SetClientRebel(int client, int victim = 0, bool status);
 
 public SharedPlugin __pl_rebel =
 {

@@ -48,6 +48,7 @@ public Plugin myinfo =
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {
 	CreateNative("IsClientRebel", Native_IsClientRebel);
+	CreateNative("SetClientRebel", Native_SetClientRebel);
 	
 	RegPluginLibrary("rebel");
 	
@@ -256,6 +257,18 @@ public int Native_IsClientRebel(Handle plugin, int numParams)
 	return IsRebel(client);
 }
 
+public int Native_SetClientRebel(Handle plugin, int numParams)
+{
+	int client = GetNativeCell(1);
+	int victim = GetNativeCell(2);
+	bool bStatus = view_as<bool>(GetNativeCell(3));
+	
+	if(g_bRebel[client] != bStatus)
+		return SetRebel(client, victim, bStatus);
+	
+	return bStatus;
+}
+
 bool SetRebel(int client, int victim, bool status)
 {
 	// Call Forward	
@@ -268,6 +281,9 @@ bool SetRebel(int client, int victim, bool status)
 	g_bRebel[client] = status;
 	
 	// send message
+	
+	// return new status
+	return g_bRebel[client];
 }
 
 bool IsRebel(int client)
