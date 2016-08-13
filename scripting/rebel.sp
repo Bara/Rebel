@@ -102,6 +102,7 @@ public void OnConfigsExecuted()
 	if(g_cPlayerCmd.BoolValue)
 	{
 		g_cPlayerCmds.GetString(sCommands, sizeof(sCommands));
+		ReplaceString(sCommands, sizeof(sCommands), " ", "");
 		iCount = ExplodeString(sCommands, ",", sCommandsL, sizeof(sCommandsL), sizeof(sCommandsL[]));
 	
 		for(int i = 0; i < iCount; i++)
@@ -114,6 +115,7 @@ public void OnConfigsExecuted()
 	if(g_cAdminCmd.BoolValue)
 	{
 		g_cAdminCmds.GetString(sCommands, sizeof(sCommands));
+		ReplaceString(sCommands, sizeof(sCommands), " ", "");
 		iCount = ExplodeString(sCommands, ",", sCommandsL, sizeof(sCommandsL), sizeof(sCommandsL[]));
 	
 		for(int i = 0; i < iCount; i++)
